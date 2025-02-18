@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
-import {sign, verify} from 'hono/jwt';
+import {verify} from 'hono/jwt';
 import { Param } from "@prisma/client/runtime/library";
-
+import { createBlogInput,updateBlogInput } from "@aryangupta001/medium-common";
 
 export const postRouter=new Hono<{
     Bindings:{
@@ -60,6 +60,13 @@ postRouter.get('/bulk',async(c)=>{
 
 postRouter.post('/blog',async(c)=>{
     const body=await c.req.json();
+    const success=createBlogInput.safeParse(body);
+      if(!success){
+        c.status(411);
+        return c.json({
+          message:"wrong Inputs"
+        })
+      }
     const authorId=c.get("userId")
     const prisma=new PrismaClient({
     datasourceUrl:c.env.DATABASE_URL,}).$extends(withAccelerate())
@@ -79,6 +86,13 @@ postRouter.post('/blog',async(c)=>{
 })
 postRouter.put('/blog',async(c)=>{
     const body=await c.req.json();
+    const success=updateBlogInput.safeParse(body);
+      if(!success){
+        c.status(411);
+        return c.json({
+          message:"wrong Inputs"
+        })
+      }
     const prisma=new PrismaClient({
     datasourceUrl:c.env.DATABASE_URL,}).$extends(withAccelerate())
 
